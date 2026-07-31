@@ -1,7 +1,10 @@
+from click import prompt
 import httpx
 
 from app.memory.memory import save_memory, get_memory
 from app.services.chat_history import save_chat, get_last_messages
+from app.rag.search import search_documents
+from app.services.router import should_use_rag, get_rag_context
 
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 
@@ -43,6 +46,11 @@ async def generate_response(prompt: str) -> str:
         return reply
     history = get_last_messages(10)
 
+    rag_context = ""
+
+    if should_use_rag(prompt):
+        rag_context = get_rag_context(prompt)
+
     context = ""
 
     for msg in history:
@@ -52,12 +60,17 @@ async def generate_response(prompt: str) -> str:
     You are Project Z, a helpful personal AI assistant.
 
     Previous conversation:
-
     {context}
 
-    Current user message:
+    Relevant document context:
+    {rag_context}
 
+    Current user message:
     {prompt}
+
+    Instructions:
+    - If relevant document context exists, answer using it.
+    - Otherwise answer normally.
 
     Assistant:
     """
