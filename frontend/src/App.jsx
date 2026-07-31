@@ -1,5 +1,6 @@
 import { useState } from "react";
 import API from "./services/api";
+import "./styles/chat.css";
 
 function App() {
   const [message, setMessage] = useState("");
@@ -47,69 +48,58 @@ function App() {
     setLoading(false);
   };
 
-  return (
-    <div
-      style={{
-        maxWidth: "800px",
-        margin: "40px auto",
-        padding: "20px",
-        fontFamily: "Arial",
-      }}
-    >
-      <h1>🤖 Project Z</h1>
+    return (
+    <div className="container">
+      <h1 className="title">🤖 Project Z</h1>
 
-      <div
-        style={{
-          border: "1px solid #ccc",
-          minHeight: "400px",
-          padding: "15px",
-          marginBottom: "20px",
-          overflowY: "auto",
-        }}
-      >
+      <div className="chat-box">
         {messages.length === 0 && (
-          <p>Start a conversation with Project Z.</p>
+          <p>Start a conversation with Project Z...</p>
         )}
 
         {messages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: "15px" }}>
-            <strong>{msg.role}:</strong>
-            <br />
-            {msg.text}
+          <div
+            key={index}
+            className={`message ${msg.role === "You" ? "user" : "ai"}`}
+          >
+            <div className="bubble">
+              {msg.text}
+            </div>
           </div>
         ))}
 
         {loading && (
-          <p>
-            <strong>Project Z:</strong> Thinking...
-          </p>
+          <div className="message ai">
+            <div className="bubble">
+              🤖 Thinking...
+            </div>
+          </div>
         )}
       </div>
 
-      <input
-        type="text"
-        placeholder="Type your message..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        style={{
-          width: "80%",
-          padding: "10px",
-          fontSize: "16px",
-        }}
-      />
+      <div className="input-area">
+        <input
+          type="text"
+          placeholder="Type your message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
+        />
 
-      <button
-        onClick={sendMessage}
-        disabled={loading}
-        style={{
-          padding: "10px 20px",
-          marginLeft: "10px",
-        }}
-      >
-        {loading ? "Thinking..." : "Send"}
-      </button>
+        <button
+          onClick={sendMessage}
+          disabled={loading}
+        >
+          {loading ? "Thinking..." : "Send"}
+        </button>
+      </div>
     </div>
   );
+  
 }
 
 export default App;
