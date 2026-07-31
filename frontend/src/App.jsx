@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import API from "./services/api";
 import "./styles/chat.css";
 
@@ -6,6 +6,12 @@ function App() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+  chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages, loading]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -75,6 +81,8 @@ function App() {
             </div>
           </div>
         )}
+
+        <div ref={chatEndRef}></div>
       </div>
 
       <div className="input-area">
@@ -99,7 +107,7 @@ function App() {
       </div>
     </div>
   );
-  
+
 }
 
 export default App;
