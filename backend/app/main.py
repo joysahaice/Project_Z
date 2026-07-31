@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from app.models.chat import ChatRequest, ChatResponse
+from app.services.ollama_service import generate_response
 
 app = FastAPI(
     title="Project Z API",
@@ -15,3 +17,10 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    reply = await generate_response(request.message)
+
+    return ChatResponse(reply=reply)
