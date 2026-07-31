@@ -3,12 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.models.chat import ChatRequest, ChatResponse
 from app.services.ollama_service import generate_response
+from app.database.database import init_database
 
 app = FastAPI(
     title="Project Z API",
     description="Personal AI Assistant Backend",
     version="0.1.0"
 )
+
+init_database()
 
 # CORS Middleware
 app.add_middleware(

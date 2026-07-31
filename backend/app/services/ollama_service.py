@@ -1,35 +1,71 @@
 import httpx
-from app.memory.memory import save_memory, get_memory
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+from app.memory.memory import save_memory, get_memory
+from app.services.chat_history import save_chat, get_last_messages
+
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 
 
 async def generate_response(prompt: str) -> str:
-
     lower = prompt.lower()
+
+    # Save user message
+    save_chat("user", prompt)
 
     # Save user's name
     if lower.startswith("my name is "):
         name = prompt[11:].strip()
         save_memory("name", name)
-        return f"Nice to meet you, {name}! I'll remember your name."
 
+        reply = f"Nice to meet you, {name}! I'll remember your name."
+        save_chat("assistant", reply)
+        return reply
+
+    # Save user's name (alternative)
     if lower.startswith("i am "):
         name = prompt[5:].strip()
         save_memory("name", name)
-        return f"Nice to meet you, {name}! I'll remember your name."
 
-    # Recall name
+        reply = f"Nice to meet you, {name}! I'll remember your name."
+        save_chat("assistant", reply)
+        return reply
+
+    # Recall user's name
     if "what is my name" in lower:
         name = get_memory("name")
-        if name:
-            return f"Your name is {name}."
-        else:
-            return "I don't know your name yet."
 
+        if name:
+            reply = f"Your name is {name}."
+        else:
+            reply = "I don't know your name yet."
+
+        save_chat("assistant", reply)
+        return reply
+    history = get_last_messages(10)
+
+    context = ""
+
+    for msg in history:
+        context += f"{msg['role']}: {msg['message']}\n"
+
+    full_prompt = f"""
+    You are Project Z, a helpful personal AI assistant.
+
+    Previous conversation:
+
+    {context}
+
+    Current user message:
+
+    {prompt}
+
+    Assistant:
+    """
+
+    # Send request to Ollama
     payload = {
         "model": "qwen2.5:3b",
-        "prompt": prompt,
+        "prompt": full_prompt,
         "stream": False,
     }
 
@@ -38,4 +74,8 @@ async def generate_response(prompt: str) -> str:
         response.raise_for_status()
 
         data = response.json()
-        return data["response"]
+        reply = data["response"]
+
+        save_chat("assistant", reply)
+
+        return reply
