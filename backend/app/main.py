@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.models.chat import ChatRequest, ChatResponse
 from app.services.ollama_service import generate_response
 
@@ -6,6 +8,18 @@ app = FastAPI(
     title="Project Z API",
     description="Personal AI Assistant Backend",
     version="0.1.0"
+)
+
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -22,5 +36,4 @@ async def health():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     reply = await generate_response(request.message)
-
     return ChatResponse(reply=reply)
