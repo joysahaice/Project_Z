@@ -1,8 +1,6 @@
-from click import prompt
 import httpx
 from app.memory.memory import save_memory, get_memory
 from app.services.chat_history import save_chat, get_last_messages
-from app.rag.search import search_documents
 from app.services.router import should_use_rag, get_rag_context
 
 OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
@@ -95,8 +93,8 @@ async def generate_response(prompt: str) -> str:
         if sources:
             reply += "\n\n📚 Sources:\n"
 
-        for source in sources:
-            reply += f"- {source}\n"
+            for item in sources:
+                reply += f"- {item['source']} (Page {item['page']})\n"
 
         save_chat("assistant", reply)
 

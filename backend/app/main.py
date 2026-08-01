@@ -55,7 +55,10 @@ async def upload_pdf(file: UploadFile = File(...)):
         temp.write(await file.read())
         temp_path = temp.name
 
-    chunks = ingest_pdf(temp_path)
+    chunks = ingest_pdf(
+    temp_path,
+    original_filename=file.filename
+)
 
     os.remove(temp_path)
 
