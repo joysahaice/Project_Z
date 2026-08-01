@@ -6,6 +6,19 @@ def search_documents(query: str, k: int = 5):
 
     docs = vector_store.similarity_search(query, k=k)
 
-    context = "\n\n".join(doc.page_content for doc in docs)
+    context = ""
 
-    return context
+    sources = []
+
+    for doc in docs:
+        context += doc.page_content + "\n\n"
+
+        source = doc.metadata.get("source", "Unknown")
+
+        if source not in sources:
+            sources.append(source)
+
+    return {
+        "context": context,
+        "sources": sources,
+    }

@@ -1,6 +1,5 @@
 from click import prompt
 import httpx
-
 from app.memory.memory import save_memory, get_memory
 from app.services.chat_history import save_chat, get_last_messages
 from app.rag.search import search_documents
@@ -47,9 +46,13 @@ async def generate_response(prompt: str) -> str:
     history = get_last_messages(10)
 
     rag_context = ""
+    sources = []
 
     if should_use_rag(prompt):
-        rag_context = get_rag_context(prompt)
+        result = get_rag_context(prompt)
+
+        rag_context = result["context"]
+        sources = result["sources"]
 
     context = ""
 
@@ -88,6 +91,12 @@ async def generate_response(prompt: str) -> str:
 
         data = response.json()
         reply = data["response"]
+
+        if sources:
+            reply += "\n\n📚 Sources:\n"
+
+        for source in sources:
+            reply += f"- {source}\n"
 
         save_chat("assistant", reply)
 

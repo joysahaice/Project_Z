@@ -1,3 +1,5 @@
+import os
+
 from langchain_core.documents import Document
 
 from app.rag.pdf_loader import load_pdf
@@ -10,8 +12,15 @@ def ingest_pdf(file_path: str):
 
     chunks = split_text(text)
 
+    filename = os.path.basename(file_path)
+
     documents = [
-        Document(page_content=chunk)
+        Document(
+            page_content=chunk,
+            metadata={
+                "source": filename
+            }
+        )
         for chunk in chunks
     ]
 
